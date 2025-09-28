@@ -10,6 +10,7 @@ import subroutines
 import fileio
 import gurobipy as gp
 
+# Get the dominating set from a set of poitns
 def get_dominating_set(points):
     points.sort(reverse=True)
     max_y = points[0][1]
@@ -20,6 +21,7 @@ def get_dominating_set(points):
             dominating_set += [point]
     return dominating_set
 
+# Calculate n points using exact algorithm, used for timing test
 def get_exact_points(G, D, n, min_div, max_div):
     result = []
     for i in range(n+1):
@@ -28,6 +30,7 @@ def get_exact_points(G, D, n, min_div, max_div):
     dominating_set = get_dominating_set(result)
     return dominating_set
 
+# Calculate n points using the approximate algorithm
 def get_algorithm_points(G, D, n):
     result = []
     for i in range(n+1):
@@ -36,6 +39,7 @@ def get_algorithm_points(G, D, n):
     dominating_set = get_dominating_set(result)
     return dominating_set
 
+# Recursively calculate pareto front using exact algorithm
 def get_pareto_front_recursive(G, D, n, start, end, depth):
     result = []
     if depth <= 10 and start[0] > end[0] + 1e-4:
@@ -52,33 +56,14 @@ def get_pareto_front_recursive(G, D, n, start, end, depth):
         result = [start]
     return result
 
+# Calling function for recursive process
 def get_pareto_front(G, D, n, min_div, max_div, min_cost, max_cost):
     result = get_pareto_front_recursive(G, D, n, (max_cost, min_div), (min_cost, max_div), 0)
     result += [(min_cost, max_div)]
     dominating_set = get_dominating_set(result)
     return dominating_set
 
-
-# def get_pareto_front(G, D, n, min_div, max_div, min_cost, max_cost):
-#     result1 = [(max_cost, min_div), (min_cost, max_div)]
-#     for k in range(10):
-#         result2 = []
-#         ran = False
-#         for i in range(len(result1)-1):
-#             if result1[i][0] > result1[i+1][0] + 1e-4:
-#                 ran = True
-#                 result2 += [result1[i]]
-#                 ass, cost, div = exact.solve_ip(G, D, n, (result1[i][1] + result1[i+1][1]) / 2)
-#                 print(cost, div)
-#                 result2 += [(cost, div)]
-#         result2 += [result1[-1]]
-#         result1 = result2
-#         if not ran: 
-#             break
-    
-#     dominating_set = get_dominating_set(result1)
-#     return dominating_set
-
+# Function for calculating area of (approximate) pareto front
 def calculate_set_area(points, min_div, min_cost):
     points.sort()
     result = (points[0][0] - min_cost) * (points[0][1] - min_div)
@@ -86,6 +71,7 @@ def calculate_set_area(points, min_div, min_cost):
         result += (points[i][0] - points[i-1][0]) * (points[i][1] - min_div)
     return result
 
+# Calculate algorithm performance using exact and approximate pareto fronts 
 def get_approximation_fraction(G, D, n, min_div, max_div, min_cost, max_cost):
     algo_points = get_algorithm_points(G, D, n)
     par_points = get_pareto_front(G, D, n, min_div, max_div, min_cost, max_cost)
@@ -93,6 +79,7 @@ def get_approximation_fraction(G, D, n, min_div, max_div, min_cost, max_cost):
     frac2 = calculate_set_area(par_points, min_div, max_div, min_cost, max_cost)
     return frac1 / frac2
 
+# Calculate pareto front for given instances
 def preprocess_pareto(divs, sizes):
     for size in sizes:
         for div in divs:
@@ -103,6 +90,7 @@ def preprocess_pareto(divs, sizes):
                 pareto = get_pareto_front(G, D, n, min_div, max_div, min_cost, max_cost)
                 fileio.write_points("exact/" + inst_name, pareto)
 
+# Calculate approximate solutions for given instances
 def preprocess_approx(divs, sizes):
     for size in sizes:
         for div in divs:
@@ -113,6 +101,7 @@ def preprocess_approx(divs, sizes):
                 pareto = get_algorithm_points(G, D, n)
                 fileio.write_points("approx/" + inst_name, pareto)
 
+# Timing test for exact and approximate algorithm
 def run_timing_test(divs, sizes):
     for size in sizes:
         for i in range(10):
@@ -129,6 +118,7 @@ def run_timing_test(divs, sizes):
                 end = time.time()
                 fileio.file_append_num("timing/exact/" + str(size), end - start)
 
+# Calculate summary of stats
 def calculate_pareto_stats(divs, sizes):
     for size in sizes:
         for div in divs:
@@ -153,6 +143,7 @@ def calculate_pareto_stats(divs, sizes):
             print("Average points approximate: " + str(total_points_approx))
             print("Average points exact: " + str(total_points_exact))
 
+# Make plots
 def plot_timings(sizes):
     arr_approx = []
     arr_exact = []
@@ -182,16 +173,13 @@ def plot_timings(sizes):
     fig.set_figwidth(6.4 * 1.5)
     plt.show()
 
-sizes = [4,8,16,32,64,128]
-plot_timings(sizes)
-
 # divs = ["disjoint_div", "uniform_div", "random_div", "distance_div"]
 # sizes = [4, 8, 16, 32, 64]
 # calculate_pareto_stats(divs, sizes)
 
-# divs = ["disjoint_div", "uniform_div", "random_div", "distance_div"]
-# sizes = [4,8,16,32,64]
-# preprocess_approx(divs, sizes)
+divs = ["disjoint_div", "uniform_div", "random_div", "distance_div"]
+sizes = [4,8,16,32]
+preprocess_approx(divs, sizes)
 
 # divs = ["random_div", "distance_div"]
 # sizes = [64]
@@ -200,48 +188,6 @@ plot_timings(sizes)
 # divs = ["distance_div", "disjoint_div", "uniform_div"]
 # sizes = [4, 4, 8, 128]
 # run_timing_test(divs, sizes)
-
-# def run_timing_tests():
-#     for size in sizes:
-#         for frac in fracs:
-#             start = time.time()
-#             for div in divs:
-#                 for i in range(14):
-#                         (n, min_div, max_div, min_cost, max_cost, G, D) = fileio.load_file("data/" + div + "_"+ str(size) + "_" + str(i))
-#                         algorithm.run_algorithm(G, D, n, frac)
-#             end = time.time()
-#             print("Algorithm n=" + str(size) + " frac=" + str(frac) + ": " + str(end - start))
-#             start = time.time()
-#             for div in divs:
-#                 for i in range(10):
-#                         (n, min_div, opt_div, G, D) = fileio.load_file("data/" + div + "_"+ str(size) + "_" + str(i))
-#                         exact.solve_ip(G, D, n, min_div + (opt_div - min_div) * frac)
-#             end = time.time()
-#             print("Exact n=" + str(size) + " frac=" + str(frac) + ": " + str(end - start) + "\n")
-
-
-# def get_pareto_front(G, D, n, iter):
-#     opt_div = algorithm.get_optimal_diversity(D, n)
-#     min_div = algorithm.get_minimum_diversity(D, n)
-#     exact_res = []
-#     algo_res = []
-#     for i in range(iter+1):
-#         frac = i / iter
-#         ass, exact_cost, exact_div = exact.solve_ip(G, D, n, min_div + (opt_div - min_div) * frac)
-#         exact_res += [(exact_cost, exact_div)]
-#         ass, algo_cost, algo_div = algorithm.run_algorithm(G, D, n, frac)
-#         algo_res += [(algo_cost, algo_div)]
-#     print("Exact")
-#     exact_pareto = get_pareto_points(exact_res)
-#     print("Algo")
-#     algo_pareto = get_pareto_points(algo_res)
-#     plt.scatter(*zip(*exact_pareto))
-#     plt.scatter(*zip(*algo_pareto), color='red')
-#     plt.xlabel("Matching weights")
-#     plt.ylabel("Diversity")
-#     plt.show()
-
-#     return exact_pareto, algo_pareto
 
 # preprocess_pareto(divs, sizes)
 # (n, min_div, max_div, min_cost, max_cost, G, D) = fileio.load_file("data/random_div_16_8")
@@ -258,3 +204,6 @@ plot_timings(sizes)
 
 # print(load_file("data/random_div_4_0"))
 # run_timing_tests()
+
+sizes = [4,8,16,32,64,128]
+plot_timings(sizes)

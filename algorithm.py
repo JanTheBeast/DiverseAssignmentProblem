@@ -1,9 +1,11 @@
+### File implementing the approximation algorithm described in the paper
 import generate_data
 import subroutines
 import networkx as nx
 import matplotlib.pyplot as plt
 import numpy as np
 
+# Draw a scatter plot
 def plot_points(points1, points2):
     plt.scatter(*zip(*points1))
     plt.scatter(*zip(*points2), color='red')
@@ -38,6 +40,7 @@ def split_matchings(assignment):
 
     # Find one of the two matchings
     matching = nx.algorithms.maximal_matching(B)
+
     M1 = []
     M2 = []
     for i in range(n):
@@ -57,6 +60,7 @@ def split_matchings(assignment):
                 M1 += [(i, j)]
             else:
                 M2 += [(i, j)]
+
     return (M1, M2)
 
 # Gets the optimal 2-matching in a diversity graph
@@ -123,7 +127,7 @@ def get_minimum_cost(G, n):
 
     return cost
 
-# Runs our algorithm in a (G, D, k) instance
+# Runs the approximation algorithm in a (G, D, k) instance
 def run_algorithm(G, D, n, k):
 
     # Solve k-cardinality 2-matching
