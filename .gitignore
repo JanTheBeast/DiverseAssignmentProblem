@@ -1,0 +1,8 @@
+venv/
+approx/
+exact/
+timing/
+.vscode/
+.__pycache__/
+gurobi.env
+gurobi.log
