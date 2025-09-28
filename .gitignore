@@ -3,6 +3,6 @@ approx/
 exact/
 timing/
 .vscode/
-.__pycache__/
+__pycache__/
 gurobi.env
 gurobi.log
