@@ -1,8 +1,8 @@
 venv/
-approx/
-exact/
+pareto/
 timing/
 .vscode/
 __pycache__/
 gurobi.env
 gurobi.log
+notes.txt

@@ -1,8 +1,10 @@
-### File containing routines for solving subproblems
+### File containing routines for solving subproblems used in the heuristic. 
+### It contains cardinality-constrained matching, the (unbalanced) transportation problem
+### and getting the dominating set from a set of points.
 
 import networkx as nx
-from networkx.algorithms import bipartite
 import numpy as np
+import matplotlib.pyplot as plt
 
 # Solves the k-cardinality constrained 2-matching problem
 def solve_k_card_2_matching(matrix, k):
@@ -52,7 +54,7 @@ def solve_k_card_2_matching(matrix, k):
 
     return result
 
-# Solves the transportation problem with certain supplies and demands
+# Solves the (unbalanced) transportation problem with certain supplies and demands
 def solve_transportation(matrix, supplies, demands):
     n1 = len(matrix)
     n2 = len(matrix[0])
@@ -77,6 +79,7 @@ def solve_transportation(matrix, supplies, demands):
     # Add existing edges
     for i in range(n1):
         for j in range(n2):
+            # Use negative weights to get max cost
             edges += [(i, j+n1, {"capacity": 2, "weight": -int(matrix[i][j])})]
 
     G.add_edges_from(edges)
@@ -84,3 +87,31 @@ def solve_transportation(matrix, supplies, demands):
     # Calculate flow
     flow = nx.max_flow_min_cost(G, s, t)
     return flow
+
+# Get the dominating set from a set of points
+def get_dominating_set(points):
+    points.sort(reverse=True)
+    max_y = points[0][1]
+    dominating_set = [points[0]]
+    for point in points[1:]:
+        if point[1] > max_y:
+            max_y = point[1]
+            dominating_set += [point]
+    return dominating_set
+
+# Draw a scatter plot
+def plot_points(points1, points2):
+    plt.scatter(*zip(*points1))
+    plt.scatter(*zip(*points2), color='red')
+    plt.xlabel("Matching weights")
+    plt.ylabel("Diversity")
+    plt.show()
+
+# Draw a graph in plt
+def draw_graph(G):
+    top = nx.bipartite.sets(G)[0]
+    pos = nx.bipartite_layout(G, top)
+    nx.draw(G, pos=pos, with_labels = True)
+    labels = nx.get_edge_attributes(G,'weight')
+    nx.draw_networkx_edge_labels(G,pos,edge_labels=labels,label_pos=0.3)
+    plt.show()

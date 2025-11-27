@@ -10,14 +10,14 @@ def array_to_string(A):
         res += "\n"
     return res
 
+def write_array(name, A):
+    f = open(name, "w")
+    f.write(array_to_string(A).removesuffix("\n"))
+    f.close()
+    
 def write_file(name, n, G, D):
     f = open(name, "w")
-    min_div = algorithm.get_minimum_diversity(D, n)
-    max_div = algorithm.get_maximum_diversity(D, n)
-    min_cost = algorithm.get_minimum_cost(G, n)
-    max_cost = algorithm.get_maximum_cost(G, n)
-
-    f.write(str(n) + " " + str(min_div) + " " + str(max_div) + " " + str(min_cost) + " " + str(max_cost) + "\n")
+    f.write(str(n) + "\n")
     f.write(array_to_string(G))
     f.write(array_to_string(D).removesuffix("\n"))
     f.close()
@@ -56,27 +56,11 @@ def file_append_num(name, num):
     f.write(str(num) + "\n")
     f.close()
 
-def generate_datasets(sizes=[4,8,16,32,64,128]):
-    for size in sizes:
-        for i in range(10):
-            G = generate_data.generate_data(size)
-            D = generate_data.generate_random_diversity(size)
-            write_file("dat/random_div_"+ str(size) + "_" + str(i), size, G, D)
-            G = generate_data.generate_data(size)
-            D = generate_data.generate_disjoint_diversity(size)
-            write_file("dat/disjoint_div_"+ str(size) + "_" + str(i), size, G, D)
-            G = generate_data.generate_data(size)
-            D = generate_data.generate_diversiy_by_distance(size)
-            write_file("dat/distance_div_"+ str(size) + "_" + str(i), size, G, D)
-            G = generate_data.generate_data(size)
-            D = generate_data.generate_uniform_diversity(size)
-            write_file("dat/uniform_div_"+ str(size) + "_" + str(i), size, G, D)
-
 def load_file(file_name):
     f = open(file_name, "r")
-    [n, min_div, max_div, min_cost, max_cost] = f.readline().split()
+    n = f.readline()
     f.close()
     full_arr = np.split(np.loadtxt(file_name, skiprows=1), [int(n)])
     G = full_arr[0]
     D = full_arr[1]
-    return int(n), float(min_div), float(max_div), float(min_cost), float(max_cost), G, D
+    return int(n), G, D

@@ -1,26 +1,7 @@
 ### File implementing the approximation algorithm described in the paper
-import generate_data
 import subroutines
 import networkx as nx
-import matplotlib.pyplot as plt
 import numpy as np
-
-# Draw a scatter plot
-def plot_points(points1, points2):
-    plt.scatter(*zip(*points1))
-    plt.scatter(*zip(*points2), color='red')
-    plt.xlabel("Matching weights")
-    plt.ylabel("Diversity")
-    plt.show()
-
-# Draw a graph in plt
-def draw_graph(G):
-    top = nx.bipartite.sets(G)[0]
-    pos = nx.bipartite_layout(G, top)
-    nx.draw(G, pos=pos, with_labels = True)
-    labels = nx.get_edge_attributes(G,'weight')
-    nx.draw_networkx_edge_labels(G,pos,edge_labels=labels,label_pos=0.3)
-    plt.show()
 
 # Generate two matchings from a 2-matching
 def split_matchings(assignment):
@@ -63,7 +44,7 @@ def split_matchings(assignment):
 
     return (M1, M2)
 
-# Gets the optimal 2-matching in a diversity graph
+# Gets the maximum diversity weight in D=(R,B)
 def get_maximum_diversity(D, n):
 
     # Solve 2-matching
@@ -78,7 +59,7 @@ def get_maximum_diversity(D, n):
 
     return diversity
 
-# Gets min-weight 2-matching in diversity graph
+# Gets the minimum diversity weight in D=(R,B)
 def get_minimum_diversity(D, n):
 
     # Calculate optimal 2-matching with inverse weights
@@ -95,7 +76,7 @@ def get_minimum_diversity(D, n):
 
     return diversity
 
-# Gets the maximal weight of 2 matchings in G
+# Gets the maximum assignment weight in G=(L,A+B)
 def get_maximum_cost(G, n):
 
     # Solve transportation
@@ -111,7 +92,7 @@ def get_maximum_cost(G, n):
 
     return cost
 
-# Gets the maximal weight of 2 matchings in G
+# Gets the minimum assignment weight in G=(L,A+B)
 def get_minimum_cost(G, n):
 
     # Solve transportation
@@ -206,3 +187,12 @@ def run_algorithm(G, D, n, k):
         diversity += D[r[0]][r[1]]
 
     return assignment, cost, diversity
+
+# Calculate n points using the approximate algorithm
+def get_algorithm_points(G, D, n):
+    result = []
+    for i in range(n+1):
+        ass, cost, div = run_algorithm(G, D, n, i)
+        result += [(cost, div)]
+    dominating_set = subroutines.get_dominating_set(result)
+    return dominating_set
